@@ -1,0 +1,55 @@
+{
+  "plugins": [
+    [
+      "@babel/plugin-proposal-decorators",
+      {
+        "legacy": true
+      }
+    ],
+    [
+      "@babel/plugin-proposal-class-properties",
+      {
+        "loose": true
+      }
+    ],
+    [
+      "@babel/plugin-transform-runtime",
+      {
+        "helpers": false,
+      }
+    ],
+    "@babel/plugin-proposal-optional-chaining",
+    "@babel/plugin-syntax-dynamic-import",
+    [
+      "import",
+      {
+        "libraryName": "antd",
+        "style": true
+      },
+      "antd"
+    ],
+    [
+      "import",
+      {
+        "libraryName": "@/interface",
+        "libraryDirectory": "",
+        "camel2DashComponentName": false
+      },
+      "interface"
+    ]
+  ],
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "targets": {
+          "ie": 9
+        },
+        "modules": false,
+        "useBuiltIns": "usage"
+      }
+    ],
+    "@babel/preset-typescript",
+    "@babel/react"
+  ]
+}
