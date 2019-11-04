@@ -13,21 +13,23 @@ export function getInitialValueAndError<T>(formDefinitions: FormDefinitions<T>):
   const initialErrors = {}
 
   Object.keys(formDefinitions).forEach((key: string) => {
-    const { initialValue, rules } = formDefinitions[key]
+    const { initialValue } = formDefinitions[key]
 
-    if (initialValue !== undefined) {
-      initialValues[key] = initialValue
-    } else {
-      initialValues[key] = undefined
-    }
-
-    if (rules) {
-      initialErrors[key] = {
-        help: '',
-        hasFeedback: false,
-      }
+    initialValues[key] = getInitialValue(initialValue)
+    initialErrors[key] = {
+      help: '',
+      hasFeedback: false,
     }
   })
 
   return { initialValues, initialErrors }
 }
+
+export function getInitialValue(initialValue: Value) {
+  if (initialValue !== undefined) {
+    return initialValue
+  } else {
+    return undefined
+  }
+}
+

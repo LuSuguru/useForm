@@ -12,9 +12,12 @@ const output = {
     format: 'es'
   },
   iife: {
-    file: path.resolve(__dirname, './build/wx-login.js'),
+    file: path.resolve(__dirname, './build/index.js'),
     format: 'iife',
-    name: 'WxLogin'
+    name: 'useForm',
+    globals:{
+      react:'react'
+    }
   }
 }
 
@@ -31,16 +34,20 @@ const plugins = [
   })
 ]
 
+const external = ['react']
+
 const esConfig = {
   input,
   output: output.es,
-  plugins: [...plugins]
+  plugins: [...plugins],
+  external
 }
 
 const iifeConfig = {
   input,
   output: output.iife,
-  plugins: [...plugins, uglify()]
+  plugins: [...plugins, uglify()],
+  external
 }
 
 module.exports = { esConfig, iifeConfig }

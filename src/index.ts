@@ -1,34 +1,39 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { SyntheticEvent, useCallback, useRef } from 'react'
 import useCurrentValue from './hook/useCurrentValue'
 import useStates from './hook/useStates'
-import { FormDefinitions, FormProps, Rule, UseForm, Value } from './type'
+import { FormDefinition, UseForm, Value } from './type'
 import { getErrorData, getValidatorMethod } from './utils/validateUtil'
-import { defaultGetValueFormEvent, getInitialValueAndError } from './utils/valueUtils'
+import { defaultGetValueFormEvent, getInitialValue, getInitialValueAndError } from './utils/valueUtils'
+
+const defaultOptions = {
+  valuePropName: 'value',
+  autoValidator: true,
+}
 
 // 表单双向绑定
-export default function <T>(formDefinitions: FormDefinitions<T>): UseForm<T> {
-  // 获得初始数据
-  const { current } = useRef(getInitialValueAndError(formDefinitions))
-
-  const [formData, setFormData] = useStates(current.initialValues)
-  const [errorProps, setErrorProps] = useStates(current.initialErrors)
+export default function <T>(): UseForm<T> {
+  const [formData, setFormData] = useStates({} as any)
+  const [errorProps, setErrorProps] = useStates({} as any)
 
   const currentFormData = useCurrentValue(formData)
   const currentErrorProps = useCurrentValue(errorProps)
+  const formProps = useRef({})
+  const formDefs = useRef({})
 
   /*
    * sideEffects: currentFormData,currentErrorProps
    */
-  function onValidate(rules: Array<Rule<T>>, key: string) {
+  function onValidate(key: string) {
     return (value: Value) => {
       const errorProp = currentErrorProps.current[key] || {}
+      const { rules } = formDefs.current[key]
 
       let error = ''
 
       rules.forEach((rule) => {
         if (error) { return }
 
-        const validatorMethod: any = getValidatorMethod(rule)
+        const validatorMethod = getValidatorMethod(rule)
 
         if (validatorMethod) {
           const errorMessage = validatorMethod({ value, errorMsg: rule.message, formData: currentFormData.current })
@@ -49,81 +54,91 @@ export default function <T>(formDefinitions: FormDefinitions<T>): UseForm<T> {
     }
   }
 
-  function createForm(): FormProps<T> {
-    const props: FormProps<T> = {}
-    Object.keys(formDefinitions).forEach((key: string) => {
-      const { valuePropName, rules, normalize, getValueformEvent } = formDefinitions[key]
+  const init = useCallback((formName: string, options: FormDefinition<T> = defaultOptions) => {
+    const memoizedFormProp = formProps.current[formName]
+    if (memoizedFormProp) {
+      return memoizedFormProp
+    }
 
-      const value = formData[key]
+    const { valuePropName = 'value', initialValue, rules, autoValidator = true, normalize, getValueformEvent } = options
 
-      props[key] = useMemo(() => ({
-        get [valuePropName]() {
-          // checkbox props 得传 checked，其余的传 value
-          if (valuePropName === 'checked') {
-            return !!value
-          }
-          return value
-        },
+    formDefs.current[formName] = options
+    currentFormData.current[formName] = getInitialValue(initialValue)
 
-        onChange: (e: any) => {
-          let newValue
-          if (getValueformEvent) {
-            newValue = getValueformEvent(e)
-          } else {
-            newValue = defaultGetValueFormEvent(valuePropName, e)
-          }
+    const formProp = {
+      get [valuePropName]() {
+        const value = currentFormData.current[formName]
 
-          if (normalize) {
-            newValue = normalize(newValue)
-          }
+        if (value === 'checked') {
+          return !!value
+        }
+        return value
+      },
 
-          if (rules && rules.length > 0) {
-            onValidate(rules, key)(newValue)
-          }
+      onChange(e: SyntheticEvent<HTMLElement>) {
+        let newValue: Value
+        if (getValueformEvent) {
+          newValue = getValueformEvent(e)
+        } else {
+          newValue = defaultGetValueFormEvent(valuePropName, e)
+        }
 
-          setFormData({ [key]: newValue })
-        },
-      }), [value])
-    })
+        if (normalize) {
+          newValue = normalize(newValue)
+        }
 
-    return props
-  }
+        if (rules && rules.length > 0 && autoValidator) {
+          onValidate(formName)(newValue)
+        }
+
+        setFormData({ [formName]: newValue })
+      },
+    }
+
+    formProps.current[formName] = formProp
+
+    return formProp
+  }, [])
 
   const isValidateSuccess = useCallback((form?: any) => (form || Object.keys(currentFormData.current)).filter((key: string) => {
     const value = currentFormData.current[key]
-    const { rules } = formDefinitions[key]
+    const { rules } = formDefs.current[key]
 
     if (rules && rules.length > 0) {
-      return onValidate(rules, key)(value)
+      return onValidate(key)(value)
     }
+
     return false
-  }).length === 0, [formDefinitions])
+  }).length === 0, [])
 
   // 对外的setForm，做一层处理，将校验清空
   const publicSetFormData = useCallback((data: T) => {
-    const errorProps = Object.keys(data).reduce((prev, key) => ({
+    const newErrorProps = Object.keys(data).reduce((prev, key) => ({
       ...prev,
       [key]: {
         help: '',
         hasFeedback: false,
+        validateStatus: 'success',
       },
     }), {})
-    setErrorProps(errorProps)
+
+    setErrorProps(newErrorProps)
     setFormData(data)
   }, [])
 
   const onResetForm = useCallback(() => {
-    const { data } = getInitialValue(formDefinitions)
-    publicSetFormData(data)
+    const { initialValues } = getInitialValueAndError(formDefs.current)
+
+    publicSetFormData(initialValues)
   }, [publicSetFormData])
 
   return {
     formData,
-    setFormData: publicSetFormData,
-    formProps: createForm(),
     errorProps,
+    setFormData: publicSetFormData,
     setErrorProps,
     isValidateSuccess,
     onResetForm,
+    init,
   }
 }

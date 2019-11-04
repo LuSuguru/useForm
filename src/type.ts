@@ -15,12 +15,13 @@ export interface FormDefinition<T> {
   valuePropName?: string
   initialValue?: Value
   rules?: Array<Rule<T>> // 校验规则
+  autoValidator?: boolean // 是否自动校验
   normalize?: (value: Value) => Value // 格式化
   getValueformEvent?: (...args: any[]) => Value
 }
 
 export type FormDefinitions<T> = {
-  [key in keyof T]: FormDefinition<T>
+  [key in keyof T]?: FormDefinition<T>
 }
 
 export interface ErrorProp {
@@ -45,12 +46,12 @@ export type FormProps<T> = {
 
 export interface UseForm<T> {
   formData?: T
-  setFormData?: (a: { [key in keyof T]?: any }) => void
-  formProps?: FormProps<T>
   errorProps?: ErrorProps<T>,
+  setFormData?: (a: { [key in keyof T]?: any }) => void
   setErrorProps?: (a: { [key in keyof T]?: ErrorProp }) => void
   isValidateSuccess?: (form?: any) => boolean,
   onResetForm?: () => void
+  init: (formName: string, options: FormDefinition<T>) => void
 }
 
 

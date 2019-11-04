@@ -8,7 +8,8 @@ module.exports = {
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '../src')
+      '@': path.resolve(__dirname, '../src'),
+      react: path.resolve('./node_modules/react')
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx']
   },
@@ -27,7 +28,7 @@ module.exports = {
                 cacheDirectory: './webpack_cache/',
               },
             }],
-            include: path.resolve(__dirname, '../src')
+            include: [path.resolve(__dirname, '../src')]
           },
           {
             test: /\.(c|le)ss$/,
@@ -41,7 +42,14 @@ module.exports = {
                     autoprefixer(),
                   ],
                 },
-              }, 'less-loader']
+              },
+              {
+                loader: 'less-loader',
+                options: {
+                  // modifyVars: theme,
+                  javascriptEnabled: true
+                }
+              }]
           },
           {
             test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
