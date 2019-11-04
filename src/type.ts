@@ -1,28 +1,56 @@
-import { Format } from './format'
-import { Strategies } from './strategies'
-
 export type EventArg = any
 export type Value = any
 
 export interface Rule<T> {
   message?: string // 错误信息
-  method?: Strategies // 校验方法
-  param?: any // 校验的参数
-  validator?: (params: { value?: any, param?: any, formData?: T }) => string // 自定义校验器
+  required?: boolean // 是否必填
+  max?: number // 最大值
+  min?: number // 最小值
+  pattern?: RegExp  // 正则
+  // validateTrigger?: string | string[] // 需要校验的方法
+  validator?: (params: { value?: any, param?: any, formData?: T }) => string // 自定义校验
 }
 
 export interface FormDefinition<T> {
   valuePropName?: string
   initialValue?: Value
   rules?: Array<Rule<T>> // 校验规则
-  isMonitor?: boolean // 是否实时校验
-
   normalize?: (value: Value) => Value // 格式化
   getValueformEvent?: (...args: any[]) => Value
 }
 
 export type FormDefinitions<T> = {
   [key in keyof T]: FormDefinition<T>
+}
+
+export interface ErrorProp {
+  help: string
+  hasFeedback: boolean
+  validateStatus: 'error' | 'success'
+}
+
+export type ErrorProps<T> = {
+  [key in keyof T]?: ErrorProp
+}
+
+export interface FormProp {
+  checked?: Value
+  value?: Value
+  onChange: (e: any) => void
+}
+
+export type FormProps<T> = {
+  [key in keyof T]?: FormProp
+}
+
+export interface UseForm<T> {
+  formData?: T
+  setFormData?: (a: { [key in keyof T]?: any }) => void
+  formProps?: FormProps<T>
+  errorProps?: ErrorProps<T>,
+  setErrorProps?: (a: { [key in keyof T]?: ErrorProp }) => void
+  isValidateSuccess?: (form?: any) => boolean,
+  onResetForm?: () => void
 }
 
 
