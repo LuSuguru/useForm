@@ -47,8 +47,8 @@ export type FormProps<T> = {
 export interface UseForm<T> {
   formData?: T
   errorProps?: ErrorProps<T>,
-  setFormData?: (a: { [key in keyof T]?: any }) => void
-  setErrorProps?: (a: { [key in keyof T]?: ErrorProp }) => void
+  setFormData?: (data: { [key in keyof T]?: any }) => void
+  setErrorProps?: (data: { [key in keyof T]: string }) => void
   isValidateSuccess?: (form?: any) => boolean,
   onResetForm?: () => void
   init: (formName: string, options: FormDefinition<T>) => void

@@ -1,7 +1,9 @@
 import { SyntheticEvent, useCallback, useRef } from 'react'
+import * as Format from './format'
 import useCurrentValue from './hook/useCurrentValue'
 import useStates from './hook/useStates'
-import { FormDefinition, UseForm, Value } from './type'
+import * as Strategies from './strategies'
+import { ErrorProp, FormDefinition, UseForm, Value } from './type'
 import { getErrorData, getValidatorMethod } from './utils/validateUtil'
 import { defaultGetValueFormEvent, getInitialValue, getInitialValueAndError } from './utils/valueUtils'
 
@@ -54,7 +56,7 @@ export default function <T>(): UseForm<T> {
     }
   }
 
-  const init = useCallback((formName: string, options: FormDefinition<T> = defaultOptions) => {
+  function init(formName: string, options: FormDefinition<T> = defaultOptions) {
     const memoizedFormProp = formProps.current[formName]
     if (memoizedFormProp) {
       return memoizedFormProp
@@ -98,18 +100,7 @@ export default function <T>(): UseForm<T> {
     formProps.current[formName] = formProp
 
     return formProp
-  }, [])
-
-  const isValidateSuccess = useCallback((form?: any) => (form || Object.keys(currentFormData.current)).filter((key: string) => {
-    const value = currentFormData.current[key]
-    const { rules } = formDefs.current[key]
-
-    if (rules && rules.length > 0) {
-      return onValidate(key)(value)
-    }
-
-    return false
-  }).length === 0, [])
+  }
 
   // 对外的setForm，做一层处理，将校验清空
   const publicSetFormData = useCallback((data: T) => {
@@ -126,6 +117,43 @@ export default function <T>(): UseForm<T> {
     setFormData(data)
   }, [])
 
+  const publicSetErrorProps = useCallback((data: { [key in keyof T]: string }) => {
+    const newErrorProps = Object.keys(data).reduce((prev, key) => {
+      let newErrorProp: ErrorProp
+      if (data[key]) {
+        newErrorProp = {
+          help: data[key],
+          hasFeedback: true,
+          validateStatus: 'error',
+        }
+      } else {
+        newErrorProp = {
+          help: '',
+          hasFeedback: false,
+          validateStatus: 'success',
+        }
+      }
+
+      return {
+        ...prev,
+        [key]: newErrorProp,
+      }
+    }, {})
+
+    setErrorProps(newErrorProps)
+  }, [])
+
+  const isValidateSuccess = useCallback((form?: any) => (form || Object.keys(currentFormData.current)).filter((key: string) => {
+    const value = currentFormData.current[key]
+    const { rules } = formDefs.current[key]
+
+    if (rules && rules.length > 0) {
+      return onValidate(key)(value)
+    }
+
+    return false
+  }).length === 0, [])
+
   const onResetForm = useCallback(() => {
     const { initialValues } = getInitialValueAndError(formDefs.current)
 
@@ -135,10 +163,17 @@ export default function <T>(): UseForm<T> {
   return {
     formData,
     errorProps,
+    init,
     setFormData: publicSetFormData,
-    setErrorProps,
+    setErrorProps: publicSetErrorProps,
     isValidateSuccess,
     onResetForm,
-    init,
   }
 }
+
+export {
+  Strategies,
+  Format,
+}
+
+

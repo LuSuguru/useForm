@@ -9,14 +9,16 @@ const input = path.resolve(__dirname, './src/index.ts')
 const output = {
   es: {
     file: path.resolve(__dirname, './es/index.js'),
-    format: 'es'
+    format: 'es',
+    exports: 'named'
   },
   iife: {
     file: path.resolve(__dirname, './build/index.js'),
     format: 'iife',
+    exports: 'named',
     name: 'useForm',
-    globals:{
-      react:'react'
+    globals: {
+      react: 'react'
     }
   }
 }

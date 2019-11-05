@@ -1,3 +1,12 @@
-examples
+example
 node_modules
+script
 src
+test
+.babelrc
+.eslintrc
+rollup.config.js
+tslint.json
+yarn.lock
+yarn-error.log
+tsconfig.js

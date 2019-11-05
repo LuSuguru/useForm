@@ -26,12 +26,50 @@ var __assign = function() {
     return __assign.apply(this, arguments);
 };
 
+function mobileFormat(value) {
+    if (value === void 0) { value = ''; }
+    value = value.replace(/\D/g, '').slice(0, 11);
+    if (value.length < 4) {
+        return value;
+    }
+    if (value.length >= 4 && value.length < 8) {
+        return value.replace(/(\d{3})/, '$1 ');
+    }
+    if (value.length >= 8) {
+        return value.replace(/(\d{3})(\d{4})/, '$1 $2 ');
+    }
+}
+function verifyFormat(value) {
+    if (value === void 0) { value = ''; }
+    value = value.replace(/\D/g, '').slice(0, 4);
+    return value;
+}
+function identityFormat(value) {
+    if (value === void 0) { value = ''; }
+    value = value.replace(/\s/g, '').slice(0, 18);
+    if (value.length < 7) {
+        return value;
+    }
+    if (value.length >= 7 && value.length < 15) {
+        return value.replace(/(\d{6})/, '$1 ');
+    }
+    if (value.length >= 15) {
+        return value.replace(/(\d{6})(\d{8})/, '$1 $2 ');
+    }
+}
+
+var format = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    mobileFormat: mobileFormat,
+    verifyFormat: verifyFormat,
+    identityFormat: identityFormat
+});
+
 function useCurrentValue(value) {
     var ref = useRef(null);
     ref.current = value;
     return ref;
 }
-//# sourceMappingURL=useCurrentValue.js.map
 
 function stateReducer(state, newState) {
     if (typeof newState === 'function') {
@@ -47,7 +85,6 @@ function useStates (initialState, reducer) {
     }, []);
     return [state, setState, onReset];
 }
-//# sourceMappingURL=useStates.js.map
 
 function isRequired(_a) {
     var value = _a.value, errorMsg = _a.errorMsg;
@@ -58,9 +95,33 @@ function isRequired(_a) {
         return errorMsg;
     }
 }
+function isPrice(_a) {
+    var value = _a.value, errorMsg = _a.errorMsg;
+    if (value && !value.match(/^(0|[1-9]+)(\.[0-9]+)?$/)) {
+        return errorMsg;
+    }
+}
+function isMobile(_a) {
+    var _b = _a.value, value = _b === void 0 ? '' : _b, errorMsg = _a.errorMsg;
+    if (value && !value.match(/^(0|86|17951)?(13[0-9]|15[0-9]|17[0-9]|18[0-9]|14[0-9])[0-9]{8}$/)) {
+        return errorMsg;
+    }
+}
+function isIdentity(_a) {
+    var value = _a.value, errorMsg = _a.errorMsg;
+    if (value && !value.match(/^\d{17}[0-9Xx]$/)) {
+        return errorMsg;
+    }
+}
 function isReg(_a) {
     var value = _a.value, pattern = _a.pattern, errorMsg = _a.errorMsg;
     if (value && !value.match(pattern)) {
+        return errorMsg;
+    }
+}
+function isVerify(_a) {
+    var value = _a.value, errorMsg = _a.errorMsg;
+    if (value && !value.match(/\d{4}/)) {
         return errorMsg;
     }
 }
@@ -76,7 +137,18 @@ function isMin(_a) {
         return errorMsg;
     }
 }
-//# sourceMappingURL=strategies.js.map
+
+var strategies = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    isRequired: isRequired,
+    isPrice: isPrice,
+    isMobile: isMobile,
+    isIdentity: isIdentity,
+    isReg: isReg,
+    isVerify: isVerify,
+    isMax: isMax,
+    isMin: isMin
+});
 
 function getValidatorMethod(rule) {
     var required = rule.required, max = rule.max, min = rule.min, pattern = rule.pattern, validator = rule.validator;
@@ -117,7 +189,6 @@ function getErrorData(help) {
         validateStatus: 'success',
     };
 }
-//# sourceMappingURL=validateUtil.js.map
 
 function defaultGetValueFormEvent(valuePropName, event) {
     if (valuePropName === void 0) { valuePropName = 'value'; }
@@ -147,7 +218,6 @@ function getInitialValue(initialValue) {
         return undefined;
     }
 }
-//# sourceMappingURL=valueUtils.js.map
 
 var defaultOptions = {
     valuePropName: 'value',
@@ -190,7 +260,7 @@ function index () {
             return error;
         };
     }
-    var init = useCallback(function (formName, options) {
+    function init(formName, options) {
         var _a;
         if (options === void 0) { options = defaultOptions; }
         var memoizedFormProp = formProps.current[formName];
@@ -232,15 +302,7 @@ function index () {
             _a);
         formProps.current[formName] = formProp;
         return formProp;
-    }, []);
-    var isValidateSuccess = useCallback(function (form) { return (form || Object.keys(currentFormData.current)).filter(function (key) {
-        var value = currentFormData.current[key];
-        var rules = formDefs.current[key].rules;
-        if (rules && rules.length > 0) {
-            return onValidate(key)(value);
-        }
-        return false;
-    }).length === 0; }, []);
+    }
     // 对外的setForm，做一层处理，将校验清空
     var publicSetFormData = useCallback(function (data) {
         var newErrorProps = Object.keys(data).reduce(function (prev, key) {
@@ -254,6 +316,36 @@ function index () {
         setErrorProps(newErrorProps);
         setFormData(data);
     }, []);
+    var publicSetErrorProps = useCallback(function (data) {
+        var newErrorProps = Object.keys(data).reduce(function (prev, key) {
+            var _a;
+            var newErrorProp;
+            if (data[key]) {
+                newErrorProp = {
+                    help: data[key],
+                    hasFeedback: true,
+                    validateStatus: 'error',
+                };
+            }
+            else {
+                newErrorProp = {
+                    help: '',
+                    hasFeedback: false,
+                    validateStatus: 'success',
+                };
+            }
+            return __assign(__assign({}, prev), (_a = {}, _a[key] = newErrorProp, _a));
+        }, {});
+        setErrorProps(newErrorProps);
+    }, []);
+    var isValidateSuccess = useCallback(function (form) { return (form || Object.keys(currentFormData.current)).filter(function (key) {
+        var value = currentFormData.current[key];
+        var rules = formDefs.current[key].rules;
+        if (rules && rules.length > 0) {
+            return onValidate(key)(value);
+        }
+        return false;
+    }).length === 0; }, []);
     var onResetForm = useCallback(function () {
         var initialValues = getInitialValueAndError(formDefs.current).initialValues;
         publicSetFormData(initialValues);
@@ -261,12 +353,13 @@ function index () {
     return {
         formData: formData,
         errorProps: errorProps,
+        init: init,
         setFormData: publicSetFormData,
-        setErrorProps: setErrorProps,
+        setErrorProps: publicSetErrorProps,
         isValidateSuccess: isValidateSuccess,
         onResetForm: onResetForm,
-        init: init,
     };
 }
 
 export default index;
+export { format as Format, strategies as Strategies };
