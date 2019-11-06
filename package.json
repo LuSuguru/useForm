@@ -1,8 +1,9 @@
 {
-  "name": "@yt/useform",
-  "version": "1.0.2",
+  "name": "@yt/use-form",
+  "version": "1.0.4",
   "description": "useForm",
   "main": "es/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
     "test": "jest",
     "build": "node script/build.js",

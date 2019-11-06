@@ -7,25 +7,25 @@ import { ErrorProp, FormDefinition, UseForm, Value } from './type'
 import { getErrorData, getValidatorMethod } from './utils/validateUtil'
 import { defaultGetValueFormEvent, getInitialValue, getInitialValueAndError } from './utils/valueUtils'
 
-const defaultOptions = {
+const defaultOptions: any = {
   valuePropName: 'value',
   autoValidator: true,
 }
 
 // 表单双向绑定
 export default function <T>(): UseForm<T> {
-  const [formData, setFormData] = useStates({} as any)
-  const [errorProps, setErrorProps] = useStates({} as any)
+  const [formData, setFormData, resetFormData] = useStates({} as any)
+  const [errorProps, setErrorProps, resetErrorProps] = useStates({} as any)
 
   const currentFormData = useCurrentValue(formData)
   const currentErrorProps = useCurrentValue(errorProps)
-  const formProps = useRef({})
-  const formDefs = useRef({})
+  const formProps = useRef<any>({})
+  const formDefs = useRef<any>({})
 
   /*
    * sideEffects: currentFormData,currentErrorProps
    */
-  function onValidate(key: string) {
+  function onValidate(key: keyof T) {
     return (value: Value) => {
       const errorProp = currentErrorProps.current[key] || {}
       const { rules } = formDefs.current[key]
@@ -56,16 +56,19 @@ export default function <T>(): UseForm<T> {
     }
   }
 
-  function init(formName: string, options: FormDefinition<T> = defaultOptions) {
+  function init(formName: keyof T, options?: FormDefinition<T>) {
     const memoizedFormProp = formProps.current[formName]
     if (memoizedFormProp) {
       return memoizedFormProp
     }
 
-    const { valuePropName = 'value', initialValue, rules, autoValidator = true, normalize, getValueformEvent } = options
+    const { valuePropName = 'value', initialValue, rules, autoValidator = true, normalize, getValueformEvent } = options || defaultOptions
 
-    formDefs.current[formName] = options
-    currentFormData.current[formName] = getInitialValue(initialValue)
+    formDefs.current[formName] = options || defaultOptions
+
+    if (!currentFormData.current[formName]) {
+      currentFormData.current[formName] = getInitialValue(initialValue)
+    }
 
     const formProp = {
       get [valuePropName]() {
@@ -143,7 +146,7 @@ export default function <T>(): UseForm<T> {
     setErrorProps(newErrorProps)
   }, [])
 
-  const isValidateSuccess = useCallback((form?: any) => (form || Object.keys(currentFormData.current)).filter((key: string) => {
+  const isValidateSuccess = useCallback((form?: any) => (form || Object.keys(currentFormData.current)).filter((key: keyof T) => {
     const value = currentFormData.current[key]
     const { rules } = formDefs.current[key]
 
@@ -160,6 +163,11 @@ export default function <T>(): UseForm<T> {
     publicSetFormData(initialValues)
   }, [publicSetFormData])
 
+  const onReset = useCallback(() => {
+    resetErrorProps()
+    resetFormData()
+  }, [])
+
   return {
     formData,
     errorProps,
@@ -168,6 +176,7 @@ export default function <T>(): UseForm<T> {
     setErrorProps: publicSetErrorProps,
     isValidateSuccess,
     onResetForm,
+    onReset,
   }
 }
 

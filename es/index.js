@@ -225,8 +225,8 @@ var defaultOptions = {
 };
 // 表单双向绑定
 function index () {
-    var _a = useStates({}), formData = _a[0], setFormData = _a[1];
-    var _b = useStates({}), errorProps = _b[0], setErrorProps = _b[1];
+    var _a = useStates({}), formData = _a[0], setFormData = _a[1], resetFormData = _a[2];
+    var _b = useStates({}), errorProps = _b[0], setErrorProps = _b[1], resetErrorProps = _b[2];
     var currentFormData = useCurrentValue(formData);
     var currentErrorProps = useCurrentValue(errorProps);
     var formProps = useRef({});
@@ -262,14 +262,15 @@ function index () {
     }
     function init(formName, options) {
         var _a;
-        if (options === void 0) { options = defaultOptions; }
         var memoizedFormProp = formProps.current[formName];
         if (memoizedFormProp) {
             return memoizedFormProp;
         }
-        var _b = options.valuePropName, valuePropName = _b === void 0 ? 'value' : _b, initialValue = options.initialValue, rules = options.rules, _c = options.autoValidator, autoValidator = _c === void 0 ? true : _c, normalize = options.normalize, getValueformEvent = options.getValueformEvent;
-        formDefs.current[formName] = options;
-        currentFormData.current[formName] = getInitialValue(initialValue);
+        var _b = options || defaultOptions, _c = _b.valuePropName, valuePropName = _c === void 0 ? 'value' : _c, initialValue = _b.initialValue, rules = _b.rules, _d = _b.autoValidator, autoValidator = _d === void 0 ? true : _d, normalize = _b.normalize, getValueformEvent = _b.getValueformEvent;
+        formDefs.current[formName] = options || defaultOptions;
+        if (!currentFormData.current[formName]) {
+            currentFormData.current[formName] = getInitialValue(initialValue);
+        }
         var formProp = (_a = {},
             Object.defineProperty(_a, valuePropName, {
                 get: function () {
@@ -350,6 +351,10 @@ function index () {
         var initialValues = getInitialValueAndError(formDefs.current).initialValues;
         publicSetFormData(initialValues);
     }, [publicSetFormData]);
+    var onReset = useCallback(function () {
+        resetErrorProps();
+        resetFormData();
+    }, []);
     return {
         formData: formData,
         errorProps: errorProps,
@@ -358,6 +363,7 @@ function index () {
         setErrorProps: publicSetErrorProps,
         isValidateSuccess: isValidateSuccess,
         onResetForm: onResetForm,
+        onReset: onReset,
     };
 }
 

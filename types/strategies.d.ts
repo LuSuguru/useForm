@@ -7,7 +7,7 @@ declare function isPrice({ value, errorMsg }: {
     errorMsg: any;
 }): any;
 declare function isMobile({ value, errorMsg }: {
-    value?: string | undefined;
+    value?: string;
     errorMsg: any;
 }): any;
 declare function isIdentity({ value, errorMsg }: {

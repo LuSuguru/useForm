@@ -49,9 +49,10 @@ export interface UseForm<T> {
   errorProps?: ErrorProps<T>,
   setFormData?: (data: { [key in keyof T]?: any }) => void
   setErrorProps?: (data: { [key in keyof T]: string }) => void
-  isValidateSuccess?: (form?: any) => boolean,
+  isValidateSuccess?: (form?: Array<keyof T>) => boolean,
   onResetForm?: () => void
-  init: (formName: string, options: FormDefinition<T>) => void
+  init: (formName: keyof T, options?: FormDefinition<T>) => void
+  onReset: () => void
 }
 
 
