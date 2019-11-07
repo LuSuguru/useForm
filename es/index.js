@@ -1,4 +1,4 @@
-import { useRef, useReducer, useCallback } from 'react';
+import { useRef, useReducer, useCallback, useMemo } from 'react';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -225,8 +225,8 @@ var defaultOptions = {
 };
 // 表单双向绑定
 function index () {
-    var _a = useStates({}), formData = _a[0], setFormData = _a[1], resetFormData = _a[2];
-    var _b = useStates({}), errorProps = _b[0], setErrorProps = _b[1], resetErrorProps = _b[2];
+    var _a = useStates({}), formData = _a[0], setFormData = _a[1];
+    var _b = useStates({}), errorProps = _b[0], setErrorProps = _b[1];
     var currentFormData = useCurrentValue(formData);
     var currentErrorProps = useCurrentValue(errorProps);
     var formProps = useRef({});
@@ -238,7 +238,7 @@ function index () {
         return function (value) {
             var _a;
             var errorProp = currentErrorProps.current[key] || {};
-            var rules = formDefs.current[key].rules;
+            var rules = (formDefs.current[key] || {}).rules;
             var error = '';
             rules.forEach(function (rule) {
                 if (error) {
@@ -304,66 +304,72 @@ function index () {
         formProps.current[formName] = formProp;
         return formProp;
     }
-    // 对外的setForm，做一层处理，将校验清空
-    var publicSetFormData = useCallback(function (data) {
-        var newErrorProps = Object.keys(data).reduce(function (prev, key) {
-            var _a;
-            return (__assign(__assign({}, prev), (_a = {}, _a[key] = {
-                help: '',
-                hasFeedback: false,
-                validateStatus: 'success',
-            }, _a)));
-        }, {});
-        setErrorProps(newErrorProps);
-        setFormData(data);
-    }, []);
-    var publicSetErrorProps = useCallback(function (data) {
-        var newErrorProps = Object.keys(data).reduce(function (prev, key) {
-            var _a;
-            var newErrorProp;
-            if (data[key]) {
-                newErrorProp = {
-                    help: data[key],
-                    hasFeedback: true,
-                    validateStatus: 'error',
-                };
-            }
-            else {
-                newErrorProp = {
+    var _c = useMemo(function () { return ({
+        remove: function (key) {
+            delete currentFormData.current[key];
+            delete currentErrorProps.current[key];
+            delete formDefs.current[key];
+            delete formProps.current[key];
+        },
+        // 对外的setForm，做一层处理，将校验清空
+        publicSetFormData: function (data) {
+            var newErrorProps = Object.keys(data).reduce(function (prev, key) {
+                var _a;
+                return (__assign(__assign({}, prev), (_a = {}, _a[key] = {
                     help: '',
                     hasFeedback: false,
                     validateStatus: 'success',
-                };
-            }
-            return __assign(__assign({}, prev), (_a = {}, _a[key] = newErrorProp, _a));
-        }, {});
-        setErrorProps(newErrorProps);
-    }, []);
-    var isValidateSuccess = useCallback(function (form) { return (form || Object.keys(currentFormData.current)).filter(function (key) {
-        var value = currentFormData.current[key];
-        var rules = formDefs.current[key].rules;
-        if (rules && rules.length > 0) {
-            return onValidate(key)(value);
-        }
-        return false;
-    }).length === 0; }, []);
+                }, _a)));
+            }, {});
+            setErrorProps(newErrorProps);
+            setFormData(data);
+        },
+        publicSetErrorProps: function (data) {
+            var newErrorProps = Object.keys(data).reduce(function (prev, key) {
+                var _a;
+                var newErrorProp;
+                if (data[key]) {
+                    newErrorProp = {
+                        help: data[key],
+                        hasFeedback: true,
+                        validateStatus: 'error',
+                    };
+                }
+                else {
+                    newErrorProp = {
+                        help: '',
+                        hasFeedback: false,
+                        validateStatus: 'success',
+                    };
+                }
+                return __assign(__assign({}, prev), (_a = {}, _a[key] = newErrorProp, _a));
+            }, {});
+            setErrorProps(newErrorProps);
+        },
+        isValidateSuccess: function (form) {
+            return (form || Object.keys(currentFormData.current)).filter(function (key) {
+                var value = currentFormData.current[key] || '';
+                var rules = (formDefs.current[key] || {}).rules;
+                if (rules && rules.length > 0) {
+                    return onValidate(key)(value);
+                }
+                return false;
+            }).length === 0;
+        },
+    }); }, []), remove = _c.remove, isValidateSuccess = _c.isValidateSuccess, publicSetErrorProps = _c.publicSetErrorProps, publicSetFormData = _c.publicSetFormData;
     var onResetForm = useCallback(function () {
         var initialValues = getInitialValueAndError(formDefs.current).initialValues;
         publicSetFormData(initialValues);
     }, [publicSetFormData]);
-    var onReset = useCallback(function () {
-        resetErrorProps();
-        resetFormData();
-    }, []);
     return {
         formData: formData,
         errorProps: errorProps,
         init: init,
+        remove: remove,
         setFormData: publicSetFormData,
         setErrorProps: publicSetErrorProps,
         isValidateSuccess: isValidateSuccess,
         onResetForm: onResetForm,
-        onReset: onReset,
     };
 }
 

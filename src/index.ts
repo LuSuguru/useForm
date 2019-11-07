@@ -1,4 +1,4 @@
-import { SyntheticEvent, useCallback, useRef } from 'react'
+import { SyntheticEvent, useCallback, useMemo, useRef } from 'react'
 import * as Format from './format'
 import useCurrentValue from './hook/useCurrentValue'
 import useStates from './hook/useStates'
@@ -14,8 +14,8 @@ const defaultOptions: any = {
 
 // 表单双向绑定
 export default function <T>(): UseForm<T> {
-  const [formData, setFormData, resetFormData] = useStates({} as any)
-  const [errorProps, setErrorProps, resetErrorProps] = useStates({} as any)
+  const [formData, setFormData] = useStates({} as any)
+  const [errorProps, setErrorProps] = useStates({} as any)
 
   const currentFormData = useCurrentValue(formData)
   const currentErrorProps = useCurrentValue(errorProps)
@@ -28,7 +28,7 @@ export default function <T>(): UseForm<T> {
   function onValidate(key: keyof T) {
     return (value: Value) => {
       const errorProp = currentErrorProps.current[key] || {}
-      const { rules } = formDefs.current[key]
+      const { rules } = formDefs.current[key] || {}
 
       let error = ''
 
@@ -105,78 +105,83 @@ export default function <T>(): UseForm<T> {
     return formProp
   }
 
-  // 对外的setForm，做一层处理，将校验清空
-  const publicSetFormData = useCallback((data: T) => {
-    const newErrorProps = Object.keys(data).reduce((prev, key) => ({
-      ...prev,
-      [key]: {
-        help: '',
-        hasFeedback: false,
-        validateStatus: 'success',
-      },
-    }), {})
+  const { remove, isValidateSuccess, publicSetErrorProps, publicSetFormData, onResetForm } = useMemo(() => ({
+    remove(key: keyof T) {
+      delete currentFormData.current[key]
+      delete currentErrorProps.current[key]
+      delete formDefs.current[key]
+      delete formProps.current[key]
+    },
 
-    setErrorProps(newErrorProps)
-    setFormData(data)
-  }, [])
-
-  const publicSetErrorProps = useCallback((data: { [key in keyof T]: string }) => {
-    const newErrorProps = Object.keys(data).reduce((prev, key) => {
-      let newErrorProp: ErrorProp
-      if (data[key]) {
-        newErrorProp = {
-          help: data[key],
-          hasFeedback: true,
-          validateStatus: 'error',
-        }
-      } else {
-        newErrorProp = {
+    // 对外的setForm，做一层处理，将校验清空
+    publicSetFormData(data: T) {
+      const newErrorProps = Object.keys(data).reduce((prev, key) => ({
+        ...prev,
+        [key]: {
           help: '',
           hasFeedback: false,
           validateStatus: 'success',
+        },
+      }), {})
+
+      setErrorProps(newErrorProps)
+      setFormData(data)
+    },
+
+    publicSetErrorProps(data: { [key in keyof T]: string }) {
+      const newErrorProps = Object.keys(data).reduce((prev, key) => {
+        let newErrorProp: ErrorProp
+        if (data[key]) {
+          newErrorProp = {
+            help: data[key],
+            hasFeedback: true,
+            validateStatus: 'error',
+          }
+        } else {
+          newErrorProp = {
+            help: '',
+            hasFeedback: false,
+            validateStatus: 'success',
+          }
         }
-      }
 
-      return {
-        ...prev,
-        [key]: newErrorProp,
-      }
-    }, {})
+        return {
+          ...prev,
+          [key]: newErrorProp,
+        }
+      }, {})
 
-    setErrorProps(newErrorProps)
-  }, [])
+      setErrorProps(newErrorProps)
+    },
 
-  const isValidateSuccess = useCallback((form?: any) => (form || Object.keys(currentFormData.current)).filter((key: keyof T) => {
-    const value = currentFormData.current[key]
-    const { rules } = formDefs.current[key]
+    isValidateSuccess(form?: any) {
+      return (form || Object.keys(currentFormData.current)).filter((key: keyof T) => {
+        const value = currentFormData.current[key] || ''
+        const { rules } = formDefs.current[key] || {}
 
-    if (rules && rules.length > 0) {
-      return onValidate(key)(value)
-    }
+        if (rules && rules.length > 0) {
+          return onValidate(key)(value)
+        }
 
-    return false
-  }).length === 0, [])
+        return false
+      }).length === 0
+    },
 
-  const onResetForm = useCallback(() => {
-    const { initialValues } = getInitialValueAndError(formDefs.current)
-
-    publicSetFormData(initialValues)
-  }, [publicSetFormData])
-
-  const onReset = useCallback(() => {
-    resetErrorProps()
-    resetFormData()
-  }, [])
+    onResetForm() {
+      const { initialValues } = getInitialValueAndError(formDefs.current)
+      publicSetFormData(initialValues)
+    },
+  }), [])
 
   return {
     formData,
     errorProps,
     init,
+    remove,
     setFormData: publicSetFormData,
     setErrorProps: publicSetErrorProps,
     isValidateSuccess,
     onResetForm,
-    onReset,
   }
 }
 

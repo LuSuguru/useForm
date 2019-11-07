@@ -40,16 +40,16 @@ export declare type FormProps<T> = {
     [key in keyof T]?: FormProp;
 };
 export interface UseForm<T> {
-    formData?: T;
-    errorProps?: ErrorProps<T>;
-    setFormData?: (data: {
-        [key in keyof T]?: any;
+    formData: T;
+    errorProps: ErrorProps<T>;
+    setFormData: (data: {
+        [key in keyof T]?: T[key];
     }) => void;
-    setErrorProps?: (data: {
+    setErrorProps: (data: {
         [key in keyof T]: string;
     }) => void;
-    isValidateSuccess?: (form?: Array<keyof T>) => boolean;
-    onResetForm?: () => void;
+    isValidateSuccess: (form?: Array<keyof T>) => boolean;
+    onResetForm: () => void;
     init: (formName: keyof T, options?: FormDefinition<T>) => void;
-    onReset: () => void;
+    remove: (data: keyof T) => void;
 }
