@@ -1,6 +1,6 @@
 {
   "name": "@yt/use-form",
-  "version": "1.0.7",
+  "version": "1.0.5",
   "description": "useForm",
   "main": "es/index.js",
   "types": "types/index.d.ts",
@@ -9,10 +9,10 @@
     "build": "node script/build.js",
     "watch": "node script/build.js --watch",
     "generate-type": "tsc",
-    "prepublishOnly": "yarn build && generate-type",
+    "prepublishOnly": "yarn build && yarn generate-type",
     "push-patch": "npm version patch && ytnpm publish",
-    "push-minor": "echo '请输入版本号' && read bv && ",
-    "push-major": "echo '请输入版本号' && read bv && "
+    "push-minor": "npm version minor && ytnpm publish",
+    "push-major": "npm version major && ytnpm publish"
   },
   "repository": {
     "type": "git",
