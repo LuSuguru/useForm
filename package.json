@@ -8,7 +8,11 @@
     "test": "jest",
     "build": "node script/build.js",
     "watch": "node script/build.js --watch",
-    "prepublishOnly": "yarn build"
+    "generate-type": "tsc",
+    "prepublishOnly": "yarn build && generate-type",
+    "push-patch": "npm version patch && ytnpm publish",
+    "push-minor": "echo '请输入版本号' && read bv && ",
+    "push-major": "echo '请输入版本号' && read bv && ",
   },
   "repository": {
     "type": "git",
