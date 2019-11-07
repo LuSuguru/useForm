@@ -1,6 +1,6 @@
 .DS_Store
-build/
-es/
+build
+es
 node_modules
 .vscode
 yarn-error.log
