@@ -8,8 +8,8 @@
     "test": "jest",
     "build": "node script/build.js",
     "watch": "node script/build.js --watch",
-    "generate-type": "tsc",
-    "prepublishOnly": "yarn build && yarn generate-type",
+    "generate-type": "tsc --skipDefaultLibCheck",
+    "prepublishOnly": "yarn build",
     "push-patch": "npm version patch && ytnpm publish",
     "push-minor": "npm version minor && ytnpm publish",
     "push-major": "npm version major && ytnpm publish"
@@ -33,6 +33,7 @@
     "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
     "chalk": "^2.4.2",
+    "csstype": "^2.6.7",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.1",
     "eslint": "^6.6.0",

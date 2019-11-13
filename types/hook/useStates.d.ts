@@ -1,4 +1,3 @@
-/// <reference types="react" />
 declare type ActionState<State> = {
     [key in keyof State]?: any;
 };

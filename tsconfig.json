@@ -3,9 +3,10 @@
     "target": "esnext",
     "declaration": true,
     "declarationDir": "./types",
-    "outDir": "./ceshi"
+    "outDir": "./ceshi",
+    "types": []
   },
   "include": [
     "./src/**/*"
-  ],
+  ]
 }
