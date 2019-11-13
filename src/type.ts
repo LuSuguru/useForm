@@ -8,7 +8,7 @@ export interface Rule<T> {
   min?: number // 最小值
   pattern?: RegExp  // 正则
   // validateTrigger?: string | string[] // 需要校验的方法
-  validator?: (params: { value?: any, param?: any, formData?: T }) => string // 自定义校验
+  validator?: (params: { value?: any, errorMsg?: any, formData?: T }) => string // 自定义校验
 }
 
 export interface FormDefinition<T> {

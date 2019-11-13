@@ -1,6 +1,6 @@
-import { Form, Input, Button } from 'antd'
 import React, { memo } from 'react'
-import useForm, { Format } from 'useform'
+import { Form, Input, Button } from 'antd'
+import useForm, { Format } from 'use-form'
 
 const { Item } = Form
 const { TextArea } = Input
