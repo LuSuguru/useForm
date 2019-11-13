@@ -19,7 +19,7 @@ const FormLayout = {
 
 function App(props) {
   const { init, formData, errorProps, setErrorProps, setFormData, isValidateSuccess, onResetForm } = useForm()
-  // console.log(formData)
+  
   function onSubmit() {
     isValidateSuccess()
     console.log(formData)
