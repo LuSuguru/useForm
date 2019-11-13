@@ -6,8 +6,8 @@ test
 .babelrc
 .eslintrc
 rollup.config.js
+tsconfig.json
 tslint.json
-yarn.lock
-yarn-error.log
-tsconfig.js
 ceshi
+yarn-error.log
+yarn.lock
