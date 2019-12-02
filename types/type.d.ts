@@ -8,7 +8,7 @@ export interface Rule<T> {
     pattern?: RegExp;
     validator?: (params: {
         value?: any;
-        param?: any;
+        errorMsg?: any;
         formData?: T;
     }) => string;
 }
@@ -36,9 +36,6 @@ export interface FormProp {
     value?: Value;
     onChange: (e: any) => void;
 }
-export declare type FormProps<T> = {
-    [key in keyof T]?: FormProp;
-};
 export interface UseForm<T> {
     formData: T;
     errorProps: ErrorProps<T>;
@@ -50,6 +47,6 @@ export interface UseForm<T> {
     }) => void;
     isValidateSuccess: (form?: Array<keyof T>) => boolean;
     onResetForm: () => void;
-    init: (formName: keyof T, options?: FormDefinition<T>) => void;
+    init: (formName: keyof T, options?: FormDefinition<T>) => FormProp;
     remove: (data: keyof T) => void;
 }
