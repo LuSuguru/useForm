@@ -1,6 +1,7 @@
-import React, { memo } from 'react'
+import React, { memo , useEffect } from 'react'
 import { Form, Input, Button } from 'antd'
 import useForm, { Format } from '@yt/use-form'
+
 
 const { Item } = Form
 const { TextArea } = Input
@@ -28,6 +29,12 @@ function App(props) {
     isValidateSuccess()
     console.log(formData)
   }
+
+  useEffect(() => {
+    setFormData({
+      name: 1232132
+    })
+  }, [])
 
   function onReset() {
     onResetForm()
