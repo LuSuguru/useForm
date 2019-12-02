@@ -121,14 +121,20 @@ export default function <T>(): UseForm<T> {
 
     // 对外的setForm，做一层处理，将校验清空
     publicSetFormData(data: T) {
-      const newErrorProps = Object.keys(data).reduce((prev, key) => ({
-        ...prev,
-        [key]: {
-          help: '',
-          hasFeedback: false,
-          validateStatus: 'success',
-        },
-      }), {})
+      const newErrorProps = Object.keys(data).reduce((prev, key) => {
+        formMemoInfo.current[key] = false
+
+        return {
+          ...prev,
+          [key]: {
+            help: '',
+            hasFeedback: false,
+            validateStatus: 'success',
+          },
+        }
+      }, {})
+
+
 
       setErrorProps(newErrorProps)
       setFormData(data)
