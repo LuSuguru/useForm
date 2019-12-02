@@ -69,7 +69,7 @@ export default function <T>(): UseForm<T> {
 
     formDefs.current[formName] = options || defaultOptions
 
-    if (currentFormData.current[formName] !== undefined) {
+    if (currentFormData.current[formName] === undefined) {
       currentFormData.current[formName] = getInitialValue(initialValue)
     }
 
