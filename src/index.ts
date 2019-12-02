@@ -21,6 +21,7 @@ export default function <T>(): UseForm<T> {
   const currentErrorProps = useCurrentValue(errorProps)
   const formProps = useRef<any>({})
   const formDefs = useRef<any>({})
+  const formMemoInfo = useRef<any>({})
 
   /*
    * sideEffects: currentFormData,currentErrorProps
@@ -58,9 +59,11 @@ export default function <T>(): UseForm<T> {
 
   function init(formName: keyof T, options?: FormDefinition<T>) {
     const memoizedFormProp = formProps.current[formName]
-    if (memoizedFormProp) {
+    if (memoizedFormProp && formMemoInfo.current[formName]) {
       return memoizedFormProp
     }
+
+    formMemoInfo.current[formName] = true
 
     const { valuePropName = 'value', initialValue, rules, autoValidator = true, normalize, getValueformEvent } = options || defaultOptions
 
@@ -96,12 +99,15 @@ export default function <T>(): UseForm<T> {
           onValidate(formName)(newValue)
         }
 
+        // 是否需要记忆，如果把 formProps 整个作为 props 往下传，可能直接拿缓存，可能会出现引用未变导致不触发渲染
+        if (currentFormData.current[formName] !== newValue) {
+          formMemoInfo.current[formName] = false
+        }
         setFormData({ [formName]: newValue })
       },
     }
 
     formProps.current[formName] = formProp
-
     return formProp
   }
 

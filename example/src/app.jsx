@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { Form, Input, Button } from 'antd'
-import useForm, { Format } from 'use-form'
+import useForm, { Format } from '@yt/use-form'
 
 const { Item } = Form
 const { TextArea } = Input
@@ -9,6 +9,17 @@ const FormLayout = {
   labelCol: { span: 3 },
   wrapperCol: { span: 16 }
 }
+
+const Test = memo((props) => {
+  console.log(props.name)
+  return (
+    <Item label="名称" required {...props.errorProps}>
+      <Input
+        placeholder="请输入名称"
+        {...props.name} />
+    </Item>
+  )
+})
 
 function App(props) {
   const { init, formData, errorProps, setErrorProps, setFormData, isValidateSuccess, onResetForm } = useForm()
@@ -25,18 +36,17 @@ function App(props) {
   return (
     <>
       <Form {...FormLayout}>
-        <Item label="名称" required {...errorProps.name}>
-          <Input
-            placeholder="请输入名称"
-            {...init('name', {
-              initialValue: '123',
-              rules: [
-                { message: '必填', required: true }
-              ],
-              normalize: Format.mobileFormat
-            })}
-          />
-        </Item>
+
+        <Test
+          errorProps={errorProps.name}
+          name={init('name', {
+            initialValue: '123',
+            rules: [
+              { message: '必填', required: true }
+            ],
+            normalize: Format.mobileFormat
+          })} />
+
         <Item label="描述">
           <TextArea
             {...init('desc')}
