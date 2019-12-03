@@ -16,8 +16,8 @@ export interface FormDefinition<T, K extends keyof T> {
   initialValue?: T[K]
   rules?: Array<Rule<T>> // 校验规则
   autoValidator?: boolean // 是否自动校验
-  normalize?: (value: Value) => Value // 格式化
-  getValueformEvent?: (...args: any[]) => Value
+  normalize?: (value: T[K]) => T[K] // 格式化
+  getValueformEvent?: (...args: any[]) => T[K]
 }
 
 export type FormDefinitions<T> = {

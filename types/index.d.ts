@@ -1,5 +1,5 @@
 import * as Format from './format';
 import * as Strategies from './strategies';
-import { UseForm } from './type';
+import { ErrorProp, FormDefinition, FormProp, UseForm } from './type';
 export default function <T>(): UseForm<T>;
-export { Strategies, Format, };
+export { Strategies, Format, ErrorProp, FormDefinition, FormProp, };

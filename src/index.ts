@@ -201,6 +201,7 @@ export default function <T>(): UseForm<T> {
 export {
   Strategies,
   Format,
+  ErrorProp, FormDefinition, FormProp,
 }
 
 
