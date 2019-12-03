@@ -12,16 +12,16 @@ export interface Rule<T> {
         formData?: T;
     }) => string;
 }
-export interface FormDefinition<T> {
+export interface FormDefinition<T, K extends keyof T> {
     valuePropName?: string;
-    initialValue?: Value;
+    initialValue?: T[K];
     rules?: Array<Rule<T>>;
     autoValidator?: boolean;
     normalize?: (value: Value) => Value;
     getValueformEvent?: (...args: any[]) => Value;
 }
 export declare type FormDefinitions<T> = {
-    [key in keyof T]?: FormDefinition<T>;
+    [key in keyof T]?: FormDefinition<T, key>;
 };
 export interface ErrorProp {
     help: string;
@@ -47,6 +47,6 @@ export interface UseForm<T> {
     }) => void;
     isValidateSuccess: (form?: Array<keyof T>) => boolean;
     onResetForm: () => void;
-    init: (formName: keyof T, options?: FormDefinition<T>) => FormProp;
+    init: (formName: keyof T, options?: FormDefinition<T, keyof T>) => FormProp;
     remove: (data: keyof T) => void;
 }

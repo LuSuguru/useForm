@@ -3,7 +3,7 @@ import * as Format from './format'
 import useCurrentValue from './hook/useCurrentValue'
 import useStates from './hook/useStates'
 import * as Strategies from './strategies'
-import { ErrorProp, FormDefinition, UseForm, Value } from './type'
+import { ErrorProp, FormDefinition, FormProp, UseForm, Value } from './type'
 import { getErrorData, getValidatorMethod } from './utils/validateUtil'
 import { defaultGetValueFormEvent, getInitialValue, getInitialValueAndError } from './utils/valueUtils'
 
@@ -17,7 +17,7 @@ export default function <T>(): UseForm<T> {
   const [formData, setFormData] = useStates({} as any)
   const [errorProps, setErrorProps] = useStates({} as any)
 
-  const currentFormData = useCurrentValue(formData)
+  const currentFormData = useCurrentValue<T>(formData)
   const currentErrorProps = useCurrentValue(errorProps)
   const formProps = useRef<any>({})
   const formDefs = useRef<any>({})
@@ -57,7 +57,7 @@ export default function <T>(): UseForm<T> {
     }
   }
 
-  function init(formName: keyof T, options?: FormDefinition<T>) {
+  function init(formName: keyof T, options?: FormDefinition<T, keyof T>): FormProp {
     const memoizedFormProp = formProps.current[formName]
     if (memoizedFormProp && formMemoInfo.current[formName]) {
       return memoizedFormProp
@@ -77,7 +77,7 @@ export default function <T>(): UseForm<T> {
       get [valuePropName]() {
         const value = currentFormData.current[formName]
 
-        if (value === 'checked') {
+        if (valuePropName === 'checked') {
           return !!value
         }
         return value
@@ -122,6 +122,7 @@ export default function <T>(): UseForm<T> {
     // 对外的setForm，做一层处理，将校验清空
     publicSetFormData(data: T) {
       const newErrorProps = Object.keys(data).reduce((prev, key) => {
+        // prop 需要变化，所以标记记上
         formMemoInfo.current[key] = false
 
         return {
@@ -166,8 +167,8 @@ export default function <T>(): UseForm<T> {
       setErrorProps(newErrorProps)
     },
 
-    isValidateSuccess(form?: any) {
-      return (form || Object.keys(currentFormData.current)).filter((key: keyof T) => {
+    isValidateSuccess(form?: Array<keyof T>) {
+      return (form || Object.keys(currentFormData.current) as Array<keyof T>).filter((key: keyof T) => {
         const value = currentFormData.current[key] || ''
         const { rules } = formDefs.current[key] || {}
 

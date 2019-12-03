@@ -11,9 +11,9 @@ export interface Rule<T> {
   validator?: (params: { value?: any, errorMsg?: any, formData?: T }) => string // 自定义校验
 }
 
-export interface FormDefinition<T> {
+export interface FormDefinition<T, K extends keyof T> {
   valuePropName?: string
-  initialValue?: Value
+  initialValue?: T[K]
   rules?: Array<Rule<T>> // 校验规则
   autoValidator?: boolean // 是否自动校验
   normalize?: (value: Value) => Value // 格式化
@@ -21,7 +21,7 @@ export interface FormDefinition<T> {
 }
 
 export type FormDefinitions<T> = {
-  [key in keyof T]?: FormDefinition<T>
+  [key in keyof T]?: FormDefinition<T, key>
 }
 
 export interface ErrorProp {
@@ -47,7 +47,7 @@ export interface UseForm<T> {
   setErrorProps: (data: { [key in keyof T]: string }) => void
   isValidateSuccess: (form?: Array<keyof T>) => boolean,
   onResetForm: () => void
-  init: (formName: keyof T, options?: FormDefinition<T>) => FormProp
+  init: (formName: keyof T, options?: FormDefinition<T, keyof T>) => FormProp
   remove: (data: keyof T) => void
 }
 
