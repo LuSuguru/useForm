@@ -31,9 +31,9 @@ export interface ErrorProp {
 export declare type ErrorProps<T> = {
     [key in keyof T]?: ErrorProp;
 };
-export interface FormProp {
-    checked?: Value;
-    value?: Value;
+export interface FormProp<K> {
+    checked?: K | Value;
+    value?: K | Value;
     onChange: (e: any) => void;
 }
 export interface UseForm<T> {
@@ -47,6 +47,6 @@ export interface UseForm<T> {
     }) => void;
     isValidateSuccess: (form?: Array<keyof T>) => boolean;
     onResetForm: () => void;
-    init: <K extends keyof T>(formName: K, options?: FormDefinition<T, K>) => FormProp;
+    init: <K extends keyof T>(formName: K, options?: FormDefinition<T, K>) => FormProp<K>;
     remove: (data: keyof T) => void;
 }

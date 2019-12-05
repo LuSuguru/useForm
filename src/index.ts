@@ -3,7 +3,7 @@ import * as Format from './format'
 import useCurrentValue from './hook/useCurrentValue'
 import useStates from './hook/useStates'
 import * as Strategies from './strategies'
-import { ErrorProp, FormDefinition, FormProp, UseForm, Value } from './type'
+import { ErrorProp, FormDefinition, FormProp, UseForm } from './type'
 import { getErrorData, getValidatorMethod } from './utils/validateUtil'
 import { defaultGetValueFormEvent, getInitialValue, getInitialValueAndError } from './utils/valueUtils'
 
@@ -26,8 +26,8 @@ export default function <T>(): UseForm<T> {
   /*
    * sideEffects: currentFormData,currentErrorProps
    */
-  function onValidate(key: keyof T) {
-    return (value: Value) => {
+  function onValidate<K extends keyof T>(key: K) {
+    return (value: T[K]) => {
       const errorProp = currentErrorProps.current[key] || {}
       const { rules } = formDefs.current[key] || {}
 
@@ -57,7 +57,7 @@ export default function <T>(): UseForm<T> {
     }
   }
 
-  function init<K extends keyof T>(formName: K, options?: FormDefinition<T, K>): FormProp {
+  function init<K extends keyof T>(formName: K, options?: FormDefinition<T, K>): FormProp<K> {
     const memoizedFormProp = formProps.current[formName]
     if (memoizedFormProp && formMemoInfo.current[formName]) {
       return memoizedFormProp
@@ -84,7 +84,7 @@ export default function <T>(): UseForm<T> {
       },
 
       onChange(e: SyntheticEvent<HTMLElement>) {
-        let newValue: Value
+        let newValue: T[K]
         if (getValueformEvent) {
           newValue = getValueformEvent(e)
         } else {
@@ -169,7 +169,7 @@ export default function <T>(): UseForm<T> {
 
     isValidateSuccess(form?: Array<keyof T>) {
       return (form || Object.keys(currentFormData.current) as Array<keyof T>).filter((key: keyof T) => {
-        const value = currentFormData.current[key] || ''
+        const value: any = currentFormData.current[key] || ''
         const { rules } = formDefs.current[key] || {}
 
         if (rules && rules.length > 0) {
