@@ -35,8 +35,8 @@ export type ErrorProps<T> = {
 }
 
 export interface FormProp<K extends keyof T, T> {
-  checked?: T[K] | Value
-  value?: T[K] | Value
+  checked?: T[K]
+  value?: T[K]
   onChange: (e: any) => void
 }
 
