@@ -57,7 +57,7 @@ export default function <T>(): UseForm<T> {
     }
   }
 
-  function init<K extends keyof T>(formName: K, options?: FormDefinition<T, K>): FormProp<K> {
+  function init<K extends keyof T>(formName: K, options?: FormDefinition<T, K>): FormProp<K, T> {
     const memoizedFormProp = formProps.current[formName]
     if (memoizedFormProp && formMemoInfo.current[formName]) {
       return memoizedFormProp
