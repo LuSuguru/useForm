@@ -18,7 +18,7 @@ export interface FormDefinition<T, K extends keyof T> {
   autoValidator?: boolean // 是否自动校验
   normalize?: (value: T[K]) => T[K] // 格式化
   getValueformEvent?: (...args: any[]) => T[K]
-  onChange: (value: T[K]) => any // onChange 的勾子
+  onChange?: (value: T[K]) => any // onChange 的勾子
 }
 
 export type FormDefinitions<T> = {
