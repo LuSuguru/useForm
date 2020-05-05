@@ -65,7 +65,7 @@ export default function <T>(): UseForm<T> {
 
     formMemoInfo.current[formName] = true
 
-    const { valuePropName = 'value', initialValue, rules, autoValidator = true, normalize, getValueformEvent } = options || defaultOptions
+    const { valuePropName = 'value', initialValue, rules, autoValidator = true, normalize, getValueformEvent, onChange } = options || defaultOptions
 
     formDefs.current[formName] = options || defaultOptions
 
@@ -104,6 +104,9 @@ export default function <T>(): UseForm<T> {
           formMemoInfo.current[formName] = false
         }
         setFormData({ [formName]: newValue })
+
+        // 调用 options 里的 onChange
+        onChange(newValue)
       },
     }
 

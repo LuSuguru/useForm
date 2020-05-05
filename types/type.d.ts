@@ -19,6 +19,7 @@ export interface FormDefinition<T, K extends keyof T> {
     autoValidator?: boolean;
     normalize?: (value: T[K]) => T[K];
     getValueformEvent?: (...args: any[]) => T[K];
+    onChange: (value: T[K]) => any;
 }
 export declare type FormDefinitions<T> = {
     [key in keyof T]?: FormDefinition<T, key>;
