@@ -107,7 +107,7 @@ export default function <T>(): UseForm<T> {
 
         // 调用 options 里的 onChange
         if (onChange) {
-          onChange(newValue)
+          onChange(newValue, currentFormData.current)
         }
       },
     }
@@ -139,8 +139,6 @@ export default function <T>(): UseForm<T> {
           },
         }
       }, {})
-
-
 
       setErrorProps(newErrorProps)
       setFormData(data)
