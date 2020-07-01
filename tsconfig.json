@@ -2,9 +2,10 @@
   "compilerOptions": {
     "target": "esnext",
     "declaration": true,
-    "declarationDir": "./types",
+    "declarationDir": "./es",
     "outDir": "./ceshi",
-    "types": []
+    "types": [],
+    "moduleResolution": "node"
   },
   "include": [
     "./src/**/*"
