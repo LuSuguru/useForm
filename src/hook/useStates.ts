@@ -1,10 +1,11 @@
-import { Reducer, useCallback, useReducer } from 'react'
+import { Dispatch, Reducer, useCallback, useReducer } from 'react'
 
-type ActionState<State> = { [key in keyof State]?: any }
-type ActionFunction<State> = (state: State) => ActionState<State>
-type Action<State> = ActionState<State> | ActionFunction<State>
+type ActionFunction<State> = (state: State) => Partial<State>
 
-function stateReducer<State extends any>(state: State, newState: ActionState<State> | ActionFunction<State>): State {
+type Action<State> = Partial<State> | ActionFunction<State>
+type StatesHook<State> = [State, Dispatch<Action<State>>, () => void]
+
+function stateReducer<State>(state: State, newState: Action<State>): State {
   if (typeof newState === 'function') {
     newState = newState(state)
   }
@@ -12,8 +13,14 @@ function stateReducer<State extends any>(state: State, newState: ActionState<Sta
   return { ...state, ...newState }
 }
 
-export default function <State>(initialState: State, reducer = stateReducer) {
-  const [state, setState] = useReducer<Reducer<State, Action<State>>>(reducer, initialState)
+export default function <State extends object>(
+  initialState: State,
+  reducer = stateReducer,
+): StatesHook<State> {
+  const [state, setState] = useReducer<Reducer<State, Action<State>>>(
+    reducer,
+    initialState,
+  )
 
   const onReset = useCallback(() => {
     setState(initialState)
@@ -21,3 +28,4 @@ export default function <State>(initialState: State, reducer = stateReducer) {
 
   return [state, setState, onReset]
 }
+
